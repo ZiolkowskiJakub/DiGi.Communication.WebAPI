@@ -1,7 +1,10 @@
 using DiGi.Communication.Classes;
+using DiGi.Communication.Propagation;
+using DiGi.Communication.Propagation.Enums;
 using DiGi.WebAPI.Classes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Nodes;
 
@@ -78,6 +81,89 @@ namespace DiGi.Communication.WebAPI.Classes
             }
 
             return Content(json, "application/json");
+        }
+
+        /// <summary>
+        /// Executes the multi-ellipsoidal propagation calculation for the provided <see cref="GeometricalPropagationModel"/>, once per requested frequency.
+        /// <para>The geometrical model is converted into the propagation model input data (see DiGi.Communication.Propagation Convert.ToPropagation_PropagationModel) using the provided frequency, polarization and electrical material properties, and the full three stage comparative analysis cascade is executed.</para>
+        /// <para>The response is a JSON array with one element per successfully calculated frequency: <c>{ "Frequency": [MHz], "PropagationResult": { ... } }</c>. The array shape is the extensibility point for the multi-frequency comparison requested by the consuming applications.</para>
+        /// </summary>
+        /// <param name="jsonObject">The JSON object with the serialized <see cref="GeometricalPropagationModel"/> holding the antennas, the scattering objects and the assigned multipath power delay profile.</param>
+        /// <param name="frequencies">The frequencies of the propagating electromagnetic wave [MHz]; repeat the query parameter to calculate multiple frequencies at once.</param>
+        /// <param name="polarization">The polarization type of the propagating electromagnetic wave (Vertical or Horizontal); defaults to Vertical.</param>
+        /// <param name="relativePermittivity">The default relative electrical permittivity applied to the scattering object mesh cells [-].</param>
+        /// <param name="conductivity">The default electrical conductivity applied to the scattering object mesh cells [S/m].</param>
+        /// <returns>An <see cref="IActionResult"/> holding the JSON array of the per frequency propagation results.</returns>
+        [HttpPost("propagationresults", Name = $"{nameof(GeometricalPropagationModelController)}_{nameof(PropagationResults)}")]
+        [ApiExplorerSettings(IgnoreApi = false)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult PropagationResults([FromBody] JsonObject? jsonObject, [FromQuery(Name = "frequency")] List<double>? frequencies, [FromQuery(Name = "polarization")] string? polarization = null, [FromQuery(Name = "relativePermittivity")] double relativePermittivity = double.NaN, [FromQuery(Name = "conductivity")] double conductivity = double.NaN)
+        {
+            Serilog.Modify.Log("{Type}:{Name} started", nameof(GeometricalPropagationModelController), nameof(PropagationResults));
+
+            if (jsonObject is null || frequencies is null || frequencies.Count == 0 || double.IsNaN(relativePermittivity) || double.IsNaN(conductivity))
+            {
+                return BadRequest();
+            }
+
+            GeometricalPropagationModel? geometricalPropagationModel = Core.Create.SerializableObject<GeometricalPropagationModel>(jsonObject);
+            if (geometricalPropagationModel is null)
+            {
+                return BadRequest();
+            }
+
+            if (!Enum.TryParse(polarization, true, out Polarization polarization_Temp))
+            {
+                polarization_Temp = Polarization.Vertical;
+            }
+
+            Propagation.Classes.MaterialProperties materialProperties = new(relativePermittivity, conductivity);
+
+            // AI-NOTE (placeholder antenna characteristics): the normalized radiation/reception
+            // characteristics are not part of the serialized GeometricalPropagationModel (they are
+            // runtime delegates). Until the antenna definitions carry real radiation patterns, the
+            // constant mock characteristics of the reference xUnit fact
+            // (DiGi.Communication.Propagation.xUnit Facts.ToPropagation_PropagationModel_TypicalUrban)
+            // are used: unit omnidirectional characteristics and a directional reception
+            // characteristic of constant value 2 (so the directional power equals 2 for a normalized
+            // Power Delay Profile). Replace these delegates with characteristics resolved from the
+            // antenna definitions once available.
+            AntennaCharacteristic receivingDirectionalCharacteristic = (theta, phi) => 2.0;
+            AntennaCharacteristic omnidirectionalCharacteristic = (theta, phi) => 1.0;
+
+            JsonArray jsonArray = [];
+            foreach (double frequency in frequencies)
+            {
+                // AI-NOTE (per object materials): the default material properties are applied to all
+                // scattering objects; pass a per reference dictionary as the last argument once the
+                // consuming applications provide per building materials.
+                Propagation.Classes.PropagationResult? propagationResult = geometricalPropagationModel.PropagationResult(frequency, polarization_Temp, materialProperties, receivingDirectionalCharacteristic, omnidirectionalCharacteristic, omnidirectionalCharacteristic);
+                if (propagationResult is null)
+                {
+                    continue;
+                }
+
+                string? json_PropagationResult = Core.Convert.ToSystem_String(propagationResult);
+                if (string.IsNullOrWhiteSpace(json_PropagationResult))
+                {
+                    continue;
+                }
+
+                jsonArray.Add(new JsonObject
+                {
+                    ["Frequency"] = frequency,
+                    ["PropagationResult"] = JsonNode.Parse(json_PropagationResult)
+                });
+            }
+
+            if (jsonArray.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Content(jsonArray.ToJsonString(), "application/json");
         }
     }
 }
