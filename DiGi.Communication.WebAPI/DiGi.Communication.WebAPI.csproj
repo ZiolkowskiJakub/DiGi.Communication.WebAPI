@@ -37,13 +37,4 @@
 		</Reference>
 	</ItemGroup>
 
-	<!-- DiGi.Communication.Propagation is referenced as a ProjectReference (not a bin HintPath like the
-	     other DiGi libraries) so the build graph builds it first and copies DiGi.Communication.Propagation.dll
-	     into this extension's output. A bin HintPath let the extension build and deploy without the new
-	     dependency present, which made the whole extension fail to load at runtime (every Communication
-	     endpoint returned 404). -->
-	<ItemGroup>
-		<ProjectReference Include="..\..\DiGi.Communication.Propagation\DiGi.Communication.Propagation\DiGi.Communication.Propagation.csproj" />
-	</ItemGroup>
-
 </Project>

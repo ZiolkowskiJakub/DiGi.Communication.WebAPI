@@ -24,7 +24,7 @@ Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system
 
 Executes the multi\-ellipsoidal propagation calculation for the provided [DiGi\.Communication\.Classes\.GeometricalPropagationModel](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.classes.geometricalpropagationmodel 'DiGi\.Communication\.Classes\.GeometricalPropagationModel'), once per requested frequency\.
 
-The geometrical model is converted into the propagation model input data (see DiGi.Communication.Propagation Convert.ToPropagation_PropagationModel) using the provided frequency, polarization and electrical material properties, and the full three stage comparative analysis cascade is executed.
+The geometrical model is converted into the propagation model input data (see DiGi.Communication Convert.ToPropagation_PropagationModel) using the provided frequency, polarization and electrical material properties, and the full three stage comparative analysis cascade is executed.
 
 The response is a JSON array with one element per successfully calculated frequency: `{ "Frequency": [MHz], "PropagationResult": { ... } }`. The array shape is the extensibility point for the multi-frequency comparison requested by the consuming applications.
 

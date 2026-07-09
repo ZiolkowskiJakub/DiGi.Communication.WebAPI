@@ -1,6 +1,5 @@
 using DiGi.Communication.Classes;
-using DiGi.Communication.Propagation;
-using DiGi.Communication.Propagation.Enums;
+using DiGi.Communication.Enums;
 using DiGi.WebAPI.Classes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -85,7 +84,7 @@ namespace DiGi.Communication.WebAPI.Classes
 
         /// <summary>
         /// Executes the multi-ellipsoidal propagation calculation for the provided <see cref="GeometricalPropagationModel"/>, once per requested frequency.
-        /// <para>The geometrical model is converted into the propagation model input data (see DiGi.Communication.Propagation Convert.ToPropagation_PropagationModel) using the provided frequency, polarization and electrical material properties, and the full three stage comparative analysis cascade is executed.</para>
+        /// <para>The geometrical model is converted into the propagation model input data (see DiGi.Communication Convert.ToPropagation_PropagationModel) using the provided frequency, polarization and electrical material properties, and the full three stage comparative analysis cascade is executed.</para>
         /// <para>The response is a JSON array with one element per successfully calculated frequency: <c>{ "Frequency": [MHz], "PropagationResult": { ... } }</c>. The array shape is the extensibility point for the multi-frequency comparison requested by the consuming applications.</para>
         /// </summary>
         /// <param name="jsonObject">The JSON object with the serialized <see cref="GeometricalPropagationModel"/> holding the antennas, the scattering objects and the assigned multipath power delay profile.</param>
@@ -119,13 +118,13 @@ namespace DiGi.Communication.WebAPI.Classes
                 polarization_Temp = Polarization.Vertical;
             }
 
-            Propagation.Classes.MaterialProperties materialProperties = new(relativePermittivity, conductivity);
+            MaterialProperties materialProperties = new(relativePermittivity, conductivity);
 
             // AI-NOTE (placeholder antenna characteristics): the normalized radiation/reception
             // characteristics are not part of the serialized GeometricalPropagationModel (they are
             // runtime delegates). Until the antenna definitions carry real radiation patterns, the
             // constant mock characteristics of the reference xUnit fact
-            // (DiGi.Communication.Propagation.xUnit Facts.ToPropagation_PropagationModel_TypicalUrban)
+            // (DiGi.Communication.xUnit Facts.ToPropagation_PropagationModel_TypicalUrban)
             // are used: unit omnidirectional characteristics and a directional reception
             // characteristic of constant value 2 (so the directional power equals 2 for a normalized
             // Power Delay Profile). Replace these delegates with characteristics resolved from the
@@ -139,7 +138,7 @@ namespace DiGi.Communication.WebAPI.Classes
                 // AI-NOTE (per object materials): the default material properties are applied to all
                 // scattering objects; pass a per reference dictionary as the last argument once the
                 // consuming applications provide per building materials.
-                Propagation.Classes.PropagationResult? propagationResult = geometricalPropagationModel.PropagationResult(frequency, polarization_Temp, materialProperties, receivingDirectionalCharacteristic, omnidirectionalCharacteristic, omnidirectionalCharacteristic);
+                PropagationResult? propagationResult = geometricalPropagationModel.PropagationResult(frequency, polarization_Temp, materialProperties, receivingDirectionalCharacteristic, omnidirectionalCharacteristic, omnidirectionalCharacteristic);
                 if (propagationResult is null)
                 {
                     continue;
