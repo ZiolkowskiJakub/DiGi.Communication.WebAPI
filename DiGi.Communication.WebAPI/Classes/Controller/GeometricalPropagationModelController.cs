@@ -98,11 +98,13 @@ namespace DiGi.Communication.WebAPI.Classes
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult PropagationResults([FromBody] JsonObject? jsonObject, [FromQuery(Name = "frequency")] List<double>? frequencies, [FromQuery(Name = "polarization")] string? polarization = null, [FromQuery(Name = "relativePermittivity")] double relativePermittivity = double.NaN, [FromQuery(Name = "conductivity")] double conductivity = double.NaN)
+        public IActionResult PropagationResults([FromBody] JsonObject? jsonObject, [FromQuery(Name = "frequency")] List<double>? frequencies, [FromQuery(Name = "polarization")] string? polarization = null, [FromQuery(Name = "relativePermittivity")] double? relativePermittivity = null, [FromQuery(Name = "conductivity")] double? conductivity = null)
         {
             Serilog.Modify.Log("{Type}:{Name} started", nameof(GeometricalPropagationModelController), nameof(PropagationResults));
 
-            if (jsonObject is null || frequencies is null || frequencies.Count == 0 || double.IsNaN(relativePermittivity) || double.IsNaN(conductivity))
+            // Nullable parameters instead of double.NaN defaults: Swagger cannot serialize NaN as a
+            // JSON default value, which would fail the swagger.json generation for the whole host.
+            if (jsonObject is null || frequencies is null || frequencies.Count == 0 || relativePermittivity is null || double.IsNaN(relativePermittivity.Value) || conductivity is null || double.IsNaN(conductivity.Value))
             {
                 return BadRequest();
             }
@@ -118,7 +120,7 @@ namespace DiGi.Communication.WebAPI.Classes
                 polarization_Temp = Polarization.Vertical;
             }
 
-            MaterialProperties materialProperties = new(relativePermittivity, conductivity);
+            MaterialProperties materialProperties = new(relativePermittivity.Value, conductivity.Value);
 
             // AI-NOTE (placeholder antenna characteristics): the normalized radiation/reception
             // characteristics are not part of the serialized GeometricalPropagationModel (they are
