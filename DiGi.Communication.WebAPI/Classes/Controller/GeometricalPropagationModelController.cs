@@ -1,5 +1,8 @@
 using DiGi.Communication.Classes;
 using DiGi.Communication.Enums;
+using DiGi.Communication.Obselete.Classes;
+using DiGi.Communication.Obselete.Delegates;
+using DiGi.Communication.Obselete.Enums;
 using DiGi.WebAPI.Classes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
