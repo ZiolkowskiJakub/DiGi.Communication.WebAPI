@@ -233,6 +233,35 @@ The scattering hit\. This value can be null\.
 [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult')  
 A [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') holding the hit direction and the reference of the scattering object that was hit, or null if the scattering hit is null or carries no direction\.
 
+<a name='DiGi.Communication.WebAPI.Create.ScatteringHitResult(thisDiGi.Communication.Interfaces.IScatteringHit,string)'></a>
+
+## Create\.ScatteringHitResult\(this IScatteringHit, string\) Method
+
+Creates a [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') for the propagation calculation result from the specified [DiGi\.Communication\.Interfaces\.IScatteringHit](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.interfaces.iscatteringhit 'DiGi\.Communication\.Interfaces\.IScatteringHit') and the display form of its reference\.
+
+The display form is supplied by the caller rather than derived here so it can be resolved once per distinct reference: [DisplayReference\(this string\)](DiGi.Communication.WebAPI.md#DiGi.Communication.WebAPI.Query.DisplayReference(thisstring) 'DiGi\.Communication\.WebAPI\.Query\.DisplayReference\(this string\)') parses the whole reference chain, which is wasted work when repeated for every hit pointing at the same scattering object.
+
+```csharp
+public static DiGi.Communication.WebAPI.Classes.ScatteringHitResult? ScatteringHitResult(this DiGi.Communication.Interfaces.IScatteringHit? scatteringHit, string? displayReference);
+```
+#### Parameters
+
+<a name='DiGi.Communication.WebAPI.Create.ScatteringHitResult(thisDiGi.Communication.Interfaces.IScatteringHit,string).scatteringHit'></a>
+
+`scatteringHit` [DiGi\.Communication\.Interfaces\.IScatteringHit](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.interfaces.iscatteringhit 'DiGi\.Communication\.Interfaces\.IScatteringHit')
+
+The scattering hit\. This value can be null\.
+
+<a name='DiGi.Communication.WebAPI.Create.ScatteringHitResult(thisDiGi.Communication.Interfaces.IScatteringHit,string).displayReference'></a>
+
+`displayReference` [System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
+
+The display form of the reference of the scattering object that was hit\. This value can be null\.
+
+#### Returns
+[ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult')  
+A [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') holding the hit direction and the reference of the scattering object that was hit, or null if the scattering hit is null or carries no direction\.
+
 <a name='DiGi.Communication.WebAPI.Create.Vector3DResult(thisDiGi.Geometry.Spatial.Classes.Vector3D)'></a>
 
 ## Create\.Vector3DResult\(this Vector3D\) Method
@@ -310,3 +339,37 @@ The [Microsoft\.Extensions\.DependencyInjection\.IServiceCollection](https://lea
 #### Returns
 [System\.Threading\.Tasks\.Task](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task 'System\.Threading\.Tasks\.Task')  
 A [System\.Threading\.Tasks\.Task](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task 'System\.Threading\.Tasks\.Task') representing the asynchronous operation\.
+
+<a name='DiGi.Communication.WebAPI.Query'></a>
+
+## Query Class
+
+```csharp
+public static class Query
+```
+
+Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object 'System\.Object') → Query
+### Methods
+
+<a name='DiGi.Communication.WebAPI.Query.DisplayReference(thisstring)'></a>
+
+## Query\.DisplayReference\(this string\) Method
+
+Gets the display form of a rendered reference: the unique identifier of the last step of the reference chain, or of the reference itself when it is not a chain\.
+
+A reference of a scattering object runs to a few hundred characters, which is unreadable in a table cell. The last step is the one that addresses the object itself, so it identifies the reference well enough to be shown on its own while the full string stays available as hover text.
+
+```csharp
+public static string? DisplayReference(this string? reference);
+```
+#### Parameters
+
+<a name='DiGi.Communication.WebAPI.Query.DisplayReference(thisstring).reference'></a>
+
+`reference` [System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
+
+The rendered reference to reduce\. This value can be null\.
+
+#### Returns
+[System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')  
+The unique identifier of the last step of the chain, or null when the reference is null, empty, not a parseable reference, or resolves to a step that carries no unique identifier\.

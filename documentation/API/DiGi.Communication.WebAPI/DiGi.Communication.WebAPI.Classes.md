@@ -482,6 +482,8 @@ Everything is expressed in world coordinates: the propagation ellipsoids, the sc
 
 AI-NOTE (payload evolution): this is the V1 delay based payload, consumed by wwwroot/js/communication-tools.js in DiGi.GIS.WebAPI.UI (renderDelayResults, the Results and Details panels). The [Delays](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.Delays 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult\.Delays') array discriminates this V1 payload from the V2 one in that file. New fields are added as additional constructor parameters and properties on the type they belong to; the consumer tolerates unknown keys. Nulls are written rather than omitted, so a field that must stay invisible to older clients needs JsonIgnore with JsonIgnoreCondition.WhenWritingNull.
 
+AI-NOTE (scattering hit nesting): the Details drill-down of the consuming application is three steps deep and the payload mirrors it exactly. [Cells](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult.Cells 'DiGi\.Communication\.WebAPI\.Classes\.AngularPowerDistributionResult\.Cells') holds one [ScatteringHitCellResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitCellResult') per populated azimuth and elevation bin, that cell holds one [ScatteringHitGroupResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitGroupResult') per distinct electrical properties, and that group holds the individual [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') instances. Flattening the group level back out would restore the earlier two step form and break the middle window.
+
 AI-NOTE (serialization contract): these result types are deliberately NOT SerializableObject instances. A SerializableObject serializes as PascalCase property names plus a _type discriminator, whereas the 3D view reads the camelCase keys literally. The keys are therefore pinned by JsonPropertyName on every property, which makes them independent of the hosting application naming policy: the same instance serializes identically from this Web API and from the consuming application. Renaming a property is safe; changing an attribute value silently breaks the 3D view.
 
 AI-NOTE (ownership): this assembly currently exposes no endpoints; the consuming application runs the solvers itself and projects the outcome through Create.GeometricalPropagationResult. Once the propagation calculation is exposed over HTTP from this assembly, this type becomes that endpoint response and the consuming application proxies it unchanged.
@@ -599,7 +601,7 @@ public System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.DelayRe
 
 Gets the electrical properties of the scattering objects that were hit, keyed by scattering object reference\.
 
-Only the scattering objects the hits of [Hits](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.Hits 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitCellResult\.Hits') point at are described: an analyzed area holds thousands of scattering objects but the hits touch a handful of them, and a reference string is long enough that sending the whole lookup would dominate the payload.
+Only the scattering objects the hits of [Hits](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.Hits 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitGroupResult\.Hits') point at are described: an analyzed area holds thousands of scattering objects but the hits touch a handful of them, and a reference string is long enough that sending the whole lookup would dominate the payload.
 
 ```csharp
 public System.Collections.Generic.Dictionary<string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult> ScatteringObjects { get; }
@@ -841,6 +843,8 @@ Represents a populated azimuth and elevation bin of an angular power distributio
 
 [AzimuthIndex](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.AzimuthIndex 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitCellResult\.AzimuthIndex') and [ElevationIndex](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ElevationIndex 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitCellResult\.ElevationIndex') address [AzimuthRanges](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult.AzimuthRanges 'DiGi\.Communication\.WebAPI\.Classes\.AngularPowerDistributionResult\.AzimuthRanges') and [ElevationRanges](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult.ElevationRanges 'DiGi\.Communication\.WebAPI\.Classes\.AngularPowerDistributionResult\.ElevationRanges'). Only non-empty intersections are described: the two range lists are filtered independently, so their cross product is overwhelmingly empty.
 
+The hits of the bin are not held flat but grouped by the electrical properties of the scattering objects they point at; see [ScatteringHitGroupResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitGroupResult').
+
 ```csharp
 public class ScatteringHitCellResult
 ```
@@ -848,34 +852,34 @@ public class ScatteringHitCellResult
 Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object 'System\.Object') → ScatteringHitCellResult
 ### Constructors
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ScatteringHitCellResult(int,int,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitResult_)'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ScatteringHitCellResult(int,int,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult_)'></a>
 
-## ScatteringHitCellResult\(int, int, List\<ScatteringHitResult\>\) Constructor
+## ScatteringHitCellResult\(int, int, List\<ScatteringHitGroupResult\>\) Constructor
 
 Initializes a new instance of the [ScatteringHitCellResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitCellResult') class\.
 
 ```csharp
-public ScatteringHitCellResult(int azimuthIndex, int elevationIndex, System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.ScatteringHitResult>? hits);
+public ScatteringHitCellResult(int azimuthIndex, int elevationIndex, System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult>? groups);
 ```
 #### Parameters
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ScatteringHitCellResult(int,int,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitResult_).azimuthIndex'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ScatteringHitCellResult(int,int,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult_).azimuthIndex'></a>
 
 `azimuthIndex` [System\.Int32](https://learn.microsoft.com/en-us/dotnet/api/system.int32 'System\.Int32')
 
 The index of the azimuth bin\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ScatteringHitCellResult(int,int,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitResult_).elevationIndex'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ScatteringHitCellResult(int,int,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult_).elevationIndex'></a>
 
 `elevationIndex` [System\.Int32](https://learn.microsoft.com/en-us/dotnet/api/system.int32 'System\.Int32')
 
 The index of the elevation bin\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ScatteringHitCellResult(int,int,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitResult_).hits'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.ScatteringHitCellResult(int,int,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult_).groups'></a>
 
-`hits` [System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
+`groups` [System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[ScatteringHitGroupResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitGroupResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
 
-The scattering hits falling into the bin\.
+The scattering hits falling into the bin, grouped by electrical properties\.
 ### Properties
 
 <a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.AzimuthIndex'></a>
@@ -904,11 +908,84 @@ public int ElevationIndex { get; }
 #### Property Value
 [System\.Int32](https://learn.microsoft.com/en-us/dotnet/api/system.int32 'System\.Int32')
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.Hits'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult.Groups'></a>
 
-## ScatteringHitCellResult\.Hits Property
+## ScatteringHitCellResult\.Groups Property
 
-Gets the scattering hits falling into the bin\.
+Gets the scattering hits falling into the bin, grouped by electrical properties\.
+
+```csharp
+public System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult> Groups { get; }
+```
+
+#### Property Value
+[System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[ScatteringHitGroupResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitGroupResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult'></a>
+
+## ScatteringHitGroupResult Class
+
+Represents the scattering hits of one azimuth and elevation bin that hit scattering objects sharing the same electrical properties\.
+
+A populated bin holds hundreds of hits but only a handful of distinct materials, so the hits are grouped rather than sent flat: the consuming application counts the groups of a bin, lists them, and drills into the hits of one group.
+
+[Key](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.Key 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitGroupResult\.Key') identifies the electrical properties across the whole payload. It is required because equal properties are described by a separate [ElectricalPropertiesResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult 'DiGi\.Communication\.WebAPI\.Classes\.ElectricalPropertiesResult') instance in every bin they occur in, and because [ElectricalPropertiesResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult 'DiGi\.Communication\.WebAPI\.Classes\.ElectricalPropertiesResult') carries no frequency range, so its values alone do not distinguish two materials that differ only by that range.
+
+```csharp
+public class ScatteringHitGroupResult
+```
+
+Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object 'System\.Object') → ScatteringHitGroupResult
+### Constructors
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.ScatteringHitGroupResult(int,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitResult_)'></a>
+
+## ScatteringHitGroupResult\(int, ElectricalPropertiesResult, List\<ScatteringHitResult\>\) Constructor
+
+Initializes a new instance of the [ScatteringHitGroupResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitGroupResult') class\.
+
+```csharp
+public ScatteringHitGroupResult(int key, DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult? electricalProperties, System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.ScatteringHitResult>? hits);
+```
+#### Parameters
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.ScatteringHitGroupResult(int,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitResult_).key'></a>
+
+`key` [System\.Int32](https://learn.microsoft.com/en-us/dotnet/api/system.int32 'System\.Int32')
+
+The payload wide identifier of the electrical properties the group was formed on\.
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.ScatteringHitGroupResult(int,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitResult_).electricalProperties'></a>
+
+`electricalProperties` [ElectricalPropertiesResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult 'DiGi\.Communication\.WebAPI\.Classes\.ElectricalPropertiesResult')
+
+The electrical properties shared by the scattering objects the hits of the group point at\.
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.ScatteringHitGroupResult(int,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.ScatteringHitResult_).hits'></a>
+
+`hits` [System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
+
+The scattering hits of the group\.
+### Properties
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.ElectricalProperties'></a>
+
+## ScatteringHitGroupResult\.ElectricalProperties Property
+
+Gets the electrical properties shared by the scattering objects the hits of the group point at\.
+
+```csharp
+public DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult? ElectricalProperties { get; }
+```
+
+#### Property Value
+[ElectricalPropertiesResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult 'DiGi\.Communication\.WebAPI\.Classes\.ElectricalPropertiesResult')
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.Hits'></a>
+
+## ScatteringHitGroupResult\.Hits Property
+
+Gets the scattering hits of the group\.
 
 ```csharp
 public System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.ScatteringHitResult> Hits { get; }
@@ -916,6 +993,21 @@ public System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.Scatter
 
 #### Property Value
 [System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult.Key'></a>
+
+## ScatteringHitGroupResult\.Key Property
+
+Gets the payload wide identifier of the electrical properties the group was formed on\.
+
+Equal across every bin the same electrical properties occur in, so groups of neighbouring bins merged by the consuming application can be matched on it.
+
+```csharp
+public int Key { get; }
+```
+
+#### Property Value
+[System\.Int32](https://learn.microsoft.com/en-us/dotnet/api/system.int32 'System\.Int32')
 
 <a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult'></a>
 
@@ -925,7 +1017,7 @@ Represents a single scattering hit of the propagation calculation result\.
 
 A scattering hit carries no location: the direction is the per hit quantity the azimuth and elevation binning is derived from, and it is unnormalized (its length carries the power). The components are therefore held directly on this type rather than in a nested direction object.
 
-[Reference](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.Reference 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.Reference') identifies the scattering object that was hit; its electrical properties are described once at the top level of [ScatteringObjects](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.ScatteringObjects 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult\.ScatteringObjects') rather than repeated on every hit.
+[Reference](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.Reference 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.Reference') identifies the scattering object that was hit; its electrical properties are described by the [ScatteringHitGroupResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitGroupResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitGroupResult') the hit belongs to and once at the top level of [ScatteringObjects](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.ScatteringObjects 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult\.ScatteringObjects'), rather than repeated on every hit.
 
 ```csharp
 public class ScatteringHitResult
@@ -934,41 +1026,64 @@ public class ScatteringHitResult
 Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object 'System\.Object') → ScatteringHitResult
 ### Constructors
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string)'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string,string)'></a>
 
-## ScatteringHitResult\(double, double, double, string\) Constructor
+## ScatteringHitResult\(double, double, double, string, string\) Constructor
 
 Initializes a new instance of the [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') class\.
 
 ```csharp
-public ScatteringHitResult(double x, double y, double z, string? reference);
+public ScatteringHitResult(double x, double y, double z, string? reference, string? displayReference);
 ```
 #### Parameters
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string).x'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string,string).x'></a>
 
 `x` [System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')
 
 The X component of the hit direction\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string).y'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string,string).y'></a>
 
 `y` [System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')
 
 The Y component of the hit direction\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string).z'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string,string).z'></a>
 
 `z` [System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')
 
 The Z component of the hit direction\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string).reference'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string,string).reference'></a>
 
 `reference` [System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
 
 The reference of the scattering object that was hit\.
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(double,double,double,string,string).displayReference'></a>
+
+`displayReference` [System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
+
+The display form of the reference of the scattering object that was hit\.
 ### Properties
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.DisplayReference'></a>
+
+## ScatteringHitResult\.DisplayReference Property
+
+Gets the display form of [Reference](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.Reference 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.Reference'): the unique identifier of the last step of the reference chain\.
+
+A reference of a scattering object runs to a few hundred characters, which is unreadable in a table cell, so its last step is sent alongside it for display; the consuming application shows this value and keeps the full [Reference](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.Reference 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.Reference') as the hover text.
+
+Null when the reference is null, empty, or not a parseable reference chain, in which case the consuming application falls back to the full [Reference](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.Reference 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.Reference').
+
+```csharp
+public string? DisplayReference { get; }
+```
+
+#### Property Value
+[System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
 
 <a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.Reference'></a>
 
