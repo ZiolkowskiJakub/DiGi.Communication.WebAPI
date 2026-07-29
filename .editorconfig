@@ -1,10 +1,5 @@
 root = true
 
-# Compiler Diagnostic Severity Overrides
-dotnet_diagnostic.IDE0130.severity = none
-dotnet_diagnostic.IDE0290.severity = none
-dotnet_diagnostic.CS1591.severity = none
-
 # Global settings for all files in the project
 [*]
 end_of_line = crlf
@@ -16,6 +11,15 @@ indent_size = 4
 tab_width = 4
 
 [*.cs]
+# Compiler Diagnostic Severity Overrides
+dotnet_diagnostic.IDE0130.severity = none
+dotnet_diagnostic.IDE0290.severity = none
+dotnet_diagnostic.CS1591.severity = none
+dotnet_diagnostic.IDE1006.severity = none
+dotnet_diagnostic.CA1016.severity = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1711.severity = none
+
 # Indentation and layout rules
 csharp_indent_labels = one_less_than_current
 csharp_using_directive_placement = outside_namespace:silent
@@ -37,21 +41,35 @@ csharp_style_prefer_collection_expression = true:warning
 # 4. Enforce target-typed new()
 csharp_style_implicit_object_creation_when_type_is_apparent = true:warning
 
-# Expression-bodied members
+# Expression-bodied members discipline
 csharp_style_expression_bodied_methods = false:silent
 csharp_style_expression_bodied_constructors = false:silent
 csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_local_functions = false:silent
 csharp_style_expression_bodied_properties = true:silent
 csharp_style_expression_bodied_indexers = true:silent
 csharp_style_expression_bodied_accessors = true:silent
 csharp_style_expression_bodied_lambdas = true:silent
-csharp_style_expression_bodied_local_functions = false:silent
 
 # Modern C# features and standard suggestions
 csharp_style_prefer_method_group_conversion = true:silent
 csharp_style_prefer_top_level_statements = true:silent
-csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_prefer_primary_constructors = true:none
 csharp_prefer_system_threading_lock = true:suggestion
+csharp_space_around_binary_operators = before_and_after
+csharp_style_throw_expression = true:suggestion
+csharp_style_prefer_null_check_over_type_check = true:suggestion
+csharp_prefer_simple_default_expression = true:suggestion
+csharp_style_prefer_local_over_anonymous_function = true:suggestion
+csharp_style_prefer_index_operator = true:suggestion
+csharp_style_prefer_range_operator = true:suggestion
+csharp_style_prefer_implicitly_typed_lambda_expression = true:suggestion
+csharp_style_prefer_tuple_swap = true:suggestion
+csharp_style_prefer_unbound_generic_type_in_nameof = true:suggestion
+csharp_style_prefer_utf8_string_literals = true:suggestion
+csharp_style_inlined_variable_declaration = true:suggestion
+csharp_style_deconstructed_variable_declaration = true:suggestion
+csharp_style_unused_value_assignment_preference = discard_variable:suggestion
 
 [*.{cs,vb}]
 #### Naming styles ####
@@ -104,3 +122,18 @@ dotnet_style_collection_initializer = true:suggestion
 dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
 dotnet_style_prefer_conditional_expression_over_assignment = true:silent
 dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_prefer_compound_assignment = true:suggestion
+dotnet_style_prefer_simplified_interpolation = true:suggestion
+dotnet_style_namespace_match_folder = false:none
+
+# Scoped diagnostic severities at section end to override any preceding style rules
+dotnet_diagnostic.IDE0130.severity = none
+dotnet_diagnostic.IDE0290.severity = none
+dotnet_diagnostic.CS1591.severity = none
+dotnet_diagnostic.IDE1006.severity = none
+dotnet_diagnostic.CA1016.severity = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1711.severity = none

@@ -472,44 +472,6 @@ public double SemiMinorAxis { get; }
 #### Property Value
 [System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')
 
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationModelController'></a>
-
-## GeometricalPropagationModelController Class
-
-Controller responsible for evaluating [DiGi\.Communication\.Classes\.GeometricalPropagationModel](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.classes.geometricalpropagationmodel 'DiGi\.Communication\.Classes\.GeometricalPropagationModel') payloads sent by consuming applications\.
-
-The controller is GIS agnostic: buildings and other obstacles arrive already converted into [DiGi\.Communication\.Classes\.ScatteringObject](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.classes.scatteringobject 'DiGi\.Communication\.Classes\.ScatteringObject') instances (triangulated [DiGi\.Geometry\.Spatial\.Classes\.Mesh3D](https://learn.microsoft.com/en-us/dotnet/api/digi.geometry.spatial.classes.mesh3d 'DiGi\.Geometry\.Spatial\.Classes\.Mesh3D') geometry), so this extension never references any GIS library. All results are calculated on the fly; nothing is persisted.
-
-```csharp
-public class GeometricalPropagationModelController : DiGi.WebAPI.Classes.WebAPIController
-```
-
-Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object 'System\.Object') → [Microsoft\.AspNetCore\.Mvc\.ControllerBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.controllerbase 'Microsoft\.AspNetCore\.Mvc\.ControllerBase') → [DiGi\.WebAPI\.Classes\.WebAPIController](https://learn.microsoft.com/en-us/dotnet/api/digi.webapi.classes.webapicontroller 'DiGi\.WebAPI\.Classes\.WebAPIController') → GeometricalPropagationModelController
-### Methods
-
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationModelController.Segment3D(System.Text.Json.Nodes.JsonObject)'></a>
-
-## GeometricalPropagationModelController\.Segment3D\(JsonObject\) Method
-
-Temporary endpoint: validates the provided [DiGi\.Communication\.Classes\.GeometricalPropagationModel](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.classes.geometricalpropagationmodel 'DiGi\.Communication\.Classes\.GeometricalPropagationModel') and returns a [DiGi\.Geometry\.Spatial\.Classes\.Segment3D](https://learn.microsoft.com/en-us/dotnet/api/digi.geometry.spatial.classes.segment3d 'DiGi\.Geometry\.Spatial\.Classes\.Segment3D') connecting the locations of its two antennas\.
-
-This action will be replaced by the full propagation calculation returning calculation objects (scattering profiles, rays, power delay profiles) to be rendered by the consuming application.
-
-```csharp
-public Microsoft.AspNetCore.Mvc.IActionResult Segment3D(System.Text.Json.Nodes.JsonObject? jsonObject);
-```
-#### Parameters
-
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationModelController.Segment3D(System.Text.Json.Nodes.JsonObject).jsonObject'></a>
-
-`jsonObject` [System\.Text\.Json\.Nodes\.JsonObject](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonobject 'System\.Text\.Json\.Nodes\.JsonObject')
-
-The JSON object with the serialized [DiGi\.Communication\.Classes\.GeometricalPropagationModel](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.classes.geometricalpropagationmodel 'DiGi\.Communication\.Classes\.GeometricalPropagationModel') holding exactly two antennas and optional [DiGi\.Communication\.Classes\.ScatteringObject](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.classes.scatteringobject 'DiGi\.Communication\.Classes\.ScatteringObject') instances\.
-
-#### Returns
-[Microsoft\.AspNetCore\.Mvc\.IActionResult](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.iactionresult 'Microsoft\.AspNetCore\.Mvc\.IActionResult')  
-An [Microsoft\.AspNetCore\.Mvc\.IActionResult](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.iactionresult 'Microsoft\.AspNetCore\.Mvc\.IActionResult') holding the [DiGi\.Geometry\.Spatial\.Classes\.Segment3D](https://learn.microsoft.com/en-us/dotnet/api/digi.geometry.spatial.classes.segment3d 'DiGi\.Geometry\.Spatial\.Classes\.Segment3D') JSON\.
-
 <a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult'></a>
 
 ## GeometricalPropagationResult Class
@@ -522,7 +484,7 @@ AI-NOTE (payload evolution): this is the V1 delay based payload, consumed by www
 
 AI-NOTE (serialization contract): these result types are deliberately NOT SerializableObject instances. A SerializableObject serializes as PascalCase property names plus a _type discriminator, whereas the 3D view reads the camelCase keys literally. The keys are therefore pinned by JsonPropertyName on every property, which makes them independent of the hosting application naming policy: the same instance serializes identically from this Web API and from the consuming application. Renaming a property is safe; changing an attribute value silently breaks the 3D view.
 
-AI-NOTE (ownership): once the propagation calculation itself migrates into [GeometricalPropagationModelController](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationModelController 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationModelController'), this type becomes that endpoint response and the consuming application proxies it unchanged.
+AI-NOTE (ownership): this assembly currently exposes no endpoints; the consuming application runs the solvers itself and projects the outcome through Create.GeometricalPropagationResult. Once the propagation calculation is exposed over HTTP from this assembly, this type becomes that endpoint response and the consuming application proxies it unchanged.
 
 ```csharp
 public class GeometricalPropagationResult

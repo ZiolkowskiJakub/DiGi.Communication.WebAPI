@@ -1,21 +1,22 @@
 # DiGi.Communication.WebAPI
 
-Web API extension exposing the [DiGi.Communication](../DiGi.Communication) radio propagation models over HTTP. The extension is loaded by the generic `DiGi.WebAPI.WindowsService` host (from its `extensions` directory) and serves its endpoints under the `communication/` route prefix — the counterpart of `DiGi.GIS.PostgreSQL.WebAPI`, which serves the `gis/` prefix.
+GIS agnostic result contract for the [DiGi.Communication](../DiGi.Communication) radio propagation calculation. It holds the render ready result types (`Classes/Result`) and the `Create` extensions that project a solved `GeometricalPropagationModel` into them, so the contract lives next to the calculation rather than in any consuming application.
+
+The assembly is still deployed as an extension of the generic `DiGi.WebAPI.WindowsService` host (from its `extensions` directory) and remains the intended home for the propagation calculation endpoint under the `communication/` route prefix — the counterpart of `DiGi.GIS.PostgreSQL.WebAPI`, which serves the `gis/` prefix. Until that endpoint exists, consuming applications run the solvers themselves and project the outcome through `Create.GeometricalPropagationResult`.
 
 ## Design rules
 
-- **No GIS references.** Neither this extension nor `DiGi.Communication` references any GIS library. Consuming applications convert their domain objects (e.g. buildings) into `ScatteringObject` instances (`Building -> Mesh3D -> ScatteringObject`) before calling the endpoints.
-- **No database.** All results are calculated on the fly by the server; nothing is persisted.
+- **No GIS references.** Neither this assembly nor `DiGi.Communication` references any GIS library. Consuming applications convert their domain objects (e.g. buildings) into `ScatteringObject` instances (`Building -> Mesh3D -> ScatteringObject`) before solving.
+- **No database.** All results are calculated on the fly; nothing is persisted.
 
 ## Endpoints
 
-| Method | Route | Description |
-|--------|-------|-------------|
-| POST | `communication/geometricalpropagationmodel/segment3d` | Temporary endpoint: accepts a serialized `GeometricalPropagationModel` holding exactly two antennas (plus optional `ScatteringObject` instances) and returns a `Segment3D` connecting the two antenna locations. It will be replaced by the full propagation calculation returning calculation objects (scattering profiles, rays, power delay profiles). |
+None. The temporary `communication/geometricalpropagationmodel/segment3d` placeholder was removed — it had no consumers and returned only a straight line between the two antennas. Adding a controller under `Classes` publishes it automatically on the deployed Web API, because the host registers every extension assembly as an MVC application part.
 
 ## Solution structure
 
-- `DiGi.Communication.WebAPI/Classes/Controller` — API controllers (`WebAPIController` implementations discovered by the hosting service).
+- `DiGi.Communication.WebAPI/Classes/Result` — the result types making up the calculation response contract. Deliberately not `SerializableObject` instances: every property pins its wire key with `JsonPropertyName` so the payload serializes identically from this assembly and from the consuming application.
+- `DiGi.Communication.WebAPI/Create` — extensions building those result types from solved `DiGi.Communication` objects.
 - `DiGi.Communication.WebAPI/Modify/InitializeAsync.cs` — extension initialization entry point invoked by the hosting service.
 
 ## Dependencies
@@ -34,7 +35,7 @@ To maintain codebase health, performance, and compatibility within Visual Studio
    - **Property matching its value type:** if a value type is fully descriptive and unique in the class, name the property after the type (`public AggregateFunction AggregateFunction { get; set; }`).
    - **Primitives** may use plain camelCase (`double tolerance`, `string name`, `int count`).
 4. **Zero warnings/analyzer messages** — nullability, parameter validation, clean code.
-5. **C# 10+** (`LangVersion` ≥ 10) — modern features (enhanced pattern matching, target-typed `new`, collection expressions, etc.) are fine within these architectural constraints. **Namespaces must be block-scoped** (as in every example below); file-scoped namespaces are disallowed and the `DiGi.Template` `.editorconfig` enforces this (`csharp_style_namespace_declarations = block_scoped`).
+5. **C# 10+ / C# 13/14** (`LangVersion` ≥ 10) — modern features (enhanced pattern matching, target-typed `new`, collection expressions, `System.Threading.Lock`, etc.) are fine within these architectural constraints. **Namespaces must be block-scoped** (as in every example below); file-scoped namespaces are disallowed and enforced via `.editorconfig` (`csharp_style_namespace_declarations = block_scoped`). See `Coding - Editor Config.md` for the unified baseline rules.
 6. **Line breaks in parameters:** If a method or constructor has fewer than 6 input parameters, do not break lines between parameters.
    - **Correct:**
      ```csharp
