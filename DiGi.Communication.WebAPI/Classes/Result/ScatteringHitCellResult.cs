@@ -5,7 +5,7 @@ namespace DiGi.Communication.WebAPI.Classes
     /// <summary>
     /// Represents a populated azimuth and elevation bin of an angular power distribution of the propagation calculation result.
     /// <para><see cref="AzimuthIndex"/> and <see cref="ElevationIndex"/> address <see cref="AngularPowerDistributionResult.AzimuthRanges"/> and <see cref="AngularPowerDistributionResult.ElevationRanges"/>. Only non-empty intersections are described: the two range lists are filtered independently, so their cross product is overwhelmingly empty.</para>
-    /// <para>The hits of the bin are not held flat but grouped by the electrical properties of the scattering objects they point at; see <see cref="ScatteringHitGroupResult"/>.</para>
+    /// <para>The hits of the bin are held flat: each one carries its own electrical properties, so there is nothing left for an intermediate grouping to describe.</para>
     /// </summary>
     public class ScatteringHitCellResult
     {
@@ -14,12 +14,12 @@ namespace DiGi.Communication.WebAPI.Classes
         /// </summary>
         /// <param name="azimuthIndex">The index of the azimuth bin.</param>
         /// <param name="elevationIndex">The index of the elevation bin.</param>
-        /// <param name="groups">The scattering hits falling into the bin, grouped by electrical properties.</param>
-        public ScatteringHitCellResult(int azimuthIndex, int elevationIndex, List<ScatteringHitGroupResult>? groups)
+        /// <param name="hits">The scattering hits falling into the bin.</param>
+        public ScatteringHitCellResult(int azimuthIndex, int elevationIndex, List<ScatteringHitResult>? hits)
         {
             AzimuthIndex = azimuthIndex;
             ElevationIndex = elevationIndex;
-            Groups = groups ?? [];
+            Hits = hits ?? [];
         }
 
         /// <summary> Gets the index of the azimuth bin. </summary>
@@ -30,8 +30,8 @@ namespace DiGi.Communication.WebAPI.Classes
         [JsonPropertyName("elevationIndex")]
         public int ElevationIndex { get; }
 
-        /// <summary> Gets the scattering hits falling into the bin, grouped by electrical properties. </summary>
-        [JsonPropertyName("groups")]
-        public List<ScatteringHitGroupResult> Groups { get; }
+        /// <summary> Gets the scattering hits falling into the bin. </summary>
+        [JsonPropertyName("hits")]
+        public List<ScatteringHitResult> Hits { get; }
     }
 }

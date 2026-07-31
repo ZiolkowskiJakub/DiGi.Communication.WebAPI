@@ -50,58 +50,6 @@ namespace DiGi.Communication.WebAPI
                 values.Add(result);
             }
 
-            // Orders the groups of a bin by material. The grouping query returns a Dictionary, whose
-            // enumeration order is not a contract, and the groups are listed as table rows in the
-            // Details drill-down, so an order that does not depend on how the hits happened to arrive
-            // is imposed here rather than client side.
-            static int Compare(ElectricalProperties electricalProperties_1, ElectricalProperties electricalProperties_2)
-            {
-                int result = string.CompareOrdinal(electricalProperties_1.Name, electricalProperties_2.Name);
-                if (result != 0)
-                {
-                    return result;
-                }
-
-                result = electricalProperties_1.A.CompareTo(electricalProperties_2.A);
-                if (result != 0)
-                {
-                    return result;
-                }
-
-                result = electricalProperties_1.B.CompareTo(electricalProperties_2.B);
-                if (result != 0)
-                {
-                    return result;
-                }
-
-                result = electricalProperties_1.C.CompareTo(electricalProperties_2.C);
-                if (result != 0)
-                {
-                    return result;
-                }
-
-                return electricalProperties_1.D.CompareTo(electricalProperties_2.D);
-            }
-
-            // Payload wide identity of a set of electrical properties. The client merges the half
-            // degree bins of the payload into whole degree buckets and has to merge their groups with
-            // them, which needs an identity that survives the bin boundary; the properties themselves
-            // travel per group and per bin, and carry no frequency range, so they cannot serve as one.
-            // ElectricalProperties has value equality over its name, coefficients and frequency range,
-            // so equal instances collapse onto a single key.
-            Dictionary<ElectricalProperties, int> electricalPropertiesKeys = [];
-
-            int ElectricalPropertiesKey(ElectricalProperties electricalProperties)
-            {
-                if (!electricalPropertiesKeys.TryGetValue(electricalProperties, out int result))
-                {
-                    result = electricalPropertiesKeys.Count;
-                    electricalPropertiesKeys[electricalProperties] = result;
-                }
-
-                return result;
-            }
-
             // Display forms of the hit references, resolved once per distinct reference: parsing a
             // reference chain walks the whole nested string, and the hits of a bin overwhelmingly
             // point at the same handful of scattering objects.
@@ -131,12 +79,6 @@ namespace DiGi.Communication.WebAPI
             Dictionary<double, List<Classes.ScatteringPolylineResult>> scatteringPolylineResults = [];
             Dictionary<double, List<Classes.VectorGroupResult>> vectorGroupResults = [];
             Dictionary<double, List<Classes.AngularPowerDistributionResult>> angularPowerDistributionResults = [];
-
-            // References of the scattering objects actually hit. Only these are described at the top
-            // level: a district holds thousands of scattering objects but the scattering hits touch a
-            // handful of them, and a reference string is long enough that sending the whole lookup
-            // would dominate the payload.
-            HashSet<string> scatteringHitReferences = [];
 
             IEnumerable<ScatteringProfile>? scatteringProfiles = geometricalPropagationModel.GetScatteringProfiles<ScatteringProfile>();
             if (scatteringProfiles is not null)
@@ -225,10 +167,8 @@ namespace DiGi.Communication.WebAPI
                         // Only populated bins are described, and only non-empty intersections are
                         // emitted: the two range lists are filtered independently, so their cross
                         // product is overwhelmingly empty.
-                        // Within a bin the hits are grouped by the electrical properties of the
-                        // scattering objects they point at, which is the middle step of the three step
-                        // drill-down: the matrix cell counts the groups, the groups are listed with
-                        // their materials, and one group opens its hits.
+                        // The hits of a bin travel flat, which is the whole of the two step
+                        // drill-down: the matrix cell counts them and opens them.
                         if (angularPowerDistribution.GetAzimuthRanges(true) is IReadOnlyList<Range<double>> azimuthRanges && azimuthRanges.Count != 0
                             && angularPowerDistribution.GetElevationRanges(true) is IReadOnlyList<Range<double>> elevationRanges && elevationRanges.Count != 0)
                         {
@@ -240,67 +180,29 @@ namespace DiGi.Communication.WebAPI
                                 {
                                     double elevation = RangeMid(elevationRanges[j]);
 
-                                    // Emptiness is established before grouping so the empty majority of
-                                    // the cross product is skipped without any scattering object lookup.
-                                    // This is the same collection lookup the grouping query runs
-                                    // internally, so it only costs a repeated lookup on populated bins.
+                                    // The hits of the bin, which is both the emptiness test for the
+                                    // empty majority of the cross product and the only hit source:
+                                    // the count of this collection is what the matrix cell renders.
                                     if (angularPowerDistribution.GetScatteringHits(azimuth, elevation) is not IReadOnlyList<IScatteringHit> scatteringHits || scatteringHits.Count == 0)
                                     {
                                         continue;
                                     }
 
-                                    // Called fully qualified because this class shadows
-                                    // DiGi.Communication.Query for unqualified use inside the
-                                    // DiGi.Communication.WebAPI namespace.
-                                    // Two behaviours of the query the payload inherits: a hit whose
-                                    // reference resolves to no scattering object, or to one carrying no
-                                    // electrical properties, is dropped rather than grouped - every
-                                    // scattering object converted from a building model carries
-                                    // Concrete, so that is not expected here; and a hit whose reference
-                                    // resolves to several scattering objects with differing properties
-                                    // joins every matching group, so the group sizes can sum to more
-                                    // than the hit count of the bin.
-                                    if (DiGi.Communication.Query.ScatteringHitsByElectricalProperties<IScatteringHit>(geometricalPropagationModel, angularPowerDistribution, azimuth, elevation) is not Dictionary<ElectricalProperties, List<IScatteringHit>> scatteringHitsByElectricalProperties || scatteringHitsByElectricalProperties.Count == 0)
+                                    List<Classes.ScatteringHitResult> scatteringHitResults = [];
+                                    foreach (IScatteringHit scatteringHit in scatteringHits)
                                     {
-                                        continue;
-                                    }
-
-                                    List<ElectricalProperties> electricalProperties_Sorted = [.. scatteringHitsByElectricalProperties.Keys];
-                                    electricalProperties_Sorted.Sort(Compare);
-
-                                    List<Classes.ScatteringHitGroupResult> scatteringHitGroupResults = [];
-                                    foreach (ElectricalProperties electricalProperties in electricalProperties_Sorted)
-                                    {
-                                        List<Classes.ScatteringHitResult> scatteringHitResults = [];
-                                        foreach (IScatteringHit scatteringHit in scatteringHitsByElectricalProperties[electricalProperties])
+                                        if (scatteringHit.ScatteringHitResult(DisplayReference(scatteringHit.Reference)) is Classes.ScatteringHitResult scatteringHitResult)
                                         {
-                                            if (scatteringHit.ScatteringHitResult(DisplayReference(scatteringHit.Reference)) is not Classes.ScatteringHitResult scatteringHitResult)
-                                            {
-                                                continue;
-                                            }
-
-                                            if (scatteringHitResult.Reference is string reference && !string.IsNullOrWhiteSpace(reference))
-                                            {
-                                                scatteringHitReferences.Add(reference);
-                                            }
-
                                             scatteringHitResults.Add(scatteringHitResult);
                                         }
-
-                                        if (scatteringHitResults.Count == 0)
-                                        {
-                                            continue;
-                                        }
-
-                                        scatteringHitGroupResults.Add(new(ElectricalPropertiesKey(electricalProperties), electricalProperties.ElectricalPropertiesResult(), scatteringHitResults));
                                     }
 
-                                    if (scatteringHitGroupResults.Count == 0)
+                                    if (scatteringHitResults.Count == 0)
                                     {
                                         continue;
                                     }
 
-                                    scatteringHitCellResults.Add(new(i, j, scatteringHitGroupResults));
+                                    scatteringHitCellResults.Add(new(i, j, scatteringHitResults));
                                 }
                             }
 
@@ -322,26 +224,6 @@ namespace DiGi.Communication.WebAPI
                 }
             }
 
-            // Electrical properties of the scattering objects the hits above point at, keyed by that
-            // reference. Resolved in one bulk lookup rather than per hit, and restricted to the hit
-            // references so an unhit district does not travel to the client.
-            Dictionary<string, Classes.ElectricalPropertiesResult> electricalPropertiesResults = [];
-            if (scatteringHitReferences.Count != 0 && DiGi.Communication.Query.ElectricalPropertiesByReference(geometricalPropagationModel) is Dictionary<string, ElectricalProperties> electricalPropertiesByReference)
-            {
-                foreach (string reference in scatteringHitReferences)
-                {
-                    if (!electricalPropertiesByReference.TryGetValue(reference, out ElectricalProperties? electricalProperties))
-                    {
-                        continue;
-                    }
-
-                    if (electricalProperties.ElectricalPropertiesResult() is Classes.ElectricalPropertiesResult electricalPropertiesResult)
-                    {
-                        electricalPropertiesResults[reference] = electricalPropertiesResult;
-                    }
-                }
-            }
-
             List<Classes.DelayResult> delayResults = [];
             foreach (double delay in delays)
             {
@@ -355,7 +237,7 @@ namespace DiGi.Communication.WebAPI
 
             // The delays list (ascending, one entry per delayResults entry) discriminates this V1
             // payload from the V2 one in communication-tools.js and feeds the delay slider.
-            return new(transmitter.Distance(receiver), transmitter.Point3DResult(), receiver.Point3DResult(), [.. delays], electricalPropertiesResults, delayResults);
+            return new(transmitter.Distance(receiver), transmitter.Point3DResult(), receiver.Point3DResult(), [.. delays], delayResults);
         }
     }
 }

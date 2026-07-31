@@ -4,27 +4,55 @@ namespace DiGi.Communication.WebAPI.Classes
 {
     /// <summary>
     /// Represents a single scattering hit of the propagation calculation result.
-    /// <para>A scattering hit carries no location: the direction is the per hit quantity the azimuth and elevation binning is derived from, and it is unnormalized (its length carries the power). The components are therefore held directly on this type rather than in a nested direction object.</para>
-    /// <para><see cref="Reference"/> identifies the scattering object that was hit; its electrical properties are described by the <see cref="ScatteringHitGroupResult"/> the hit belongs to and once at the top level of <see cref="GeometricalPropagationResult.ScatteringObjects"/>, rather than repeated on every hit.</para>
+    /// <para>Everything a hit describes is read off the hit itself: it carries its own location, its own electrical properties and the derived material and geometry values, so a consuming application needs no lookup to render a row.</para>
+    /// <para>The angles are sent in radians like every other angle of this payload, and the consuming application converts them for display. A value that could not be derived (missing electrical properties, missing antenna location) is sent as null rather than as NaN: NaN is not valid JSON and the serializer rejects it.</para>
+    /// <para><see cref="VectorReceiver"/>, <see cref="VectorTransmitter"/> and <see cref="Normal"/> are unit vectors, unlike the angular power distribution vectors of <see cref="VectorGroupResult"/>, whose length carries the power.</para>
     /// </summary>
     public class ScatteringHitResult
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ScatteringHitResult"/> class.
         /// </summary>
-        /// <param name="x">The X component of the hit direction.</param>
-        /// <param name="y">The Y component of the hit direction.</param>
-        /// <param name="z">The Z component of the hit direction.</param>
+        /// <param name="location">The location of the hit point in world coordinates.</param>
         /// <param name="reference">The reference of the scattering object that was hit.</param>
         /// <param name="displayReference">The display form of the reference of the scattering object that was hit.</param>
-        public ScatteringHitResult(double x, double y, double z, string? reference, string? displayReference)
+        /// <param name="electricalProperties">The electrical properties of the scattering object that was hit.</param>
+        /// <param name="conductivity">The material conductivity [S/m] at the operating frequency.</param>
+        /// <param name="relativePermittivity">The material relative permittivity at the operating frequency.</param>
+        /// <param name="reflectionAngle">The reflection angle [rad] relative to the surface normal.</param>
+        /// <param name="grazingAngle">The grazing angle [rad] relative to the surface tangent plane.</param>
+        /// <param name="vectorReceiver">The unit direction vector from the hit point towards the receiver.</param>
+        /// <param name="vectorTransmitter">The unit direction vector from the transmitter towards the hit point.</param>
+        /// <param name="normal">The unit surface normal vector at the hit point.</param>
+        public ScatteringHitResult(
+            Point3DResult? location,
+            string? reference,
+            string? displayReference,
+            ElectricalPropertiesResult? electricalProperties,
+            double? conductivity,
+            double? relativePermittivity,
+            double? reflectionAngle,
+            double? grazingAngle,
+            Vector3DResult? vectorReceiver,
+            Vector3DResult? vectorTransmitter,
+            Vector3DResult? normal)
         {
-            X = x;
-            Y = y;
-            Z = z;
+            Location = location;
             Reference = reference;
             DisplayReference = displayReference;
+            ElectricalProperties = electricalProperties;
+            Conductivity = conductivity;
+            RelativePermittivity = relativePermittivity;
+            ReflectionAngle = reflectionAngle;
+            GrazingAngle = grazingAngle;
+            VectorReceiver = vectorReceiver;
+            VectorTransmitter = vectorTransmitter;
+            Normal = normal;
         }
+
+        /// <summary> Gets the material conductivity [S/m] at the operating frequency, or null if it could not be derived. </summary>
+        [JsonPropertyName("conductivity")]
+        public double? Conductivity { get; }
 
         /// <summary>
         /// Gets the display form of <see cref="Reference"/>: the unique identifier of the last step of the reference chain.
@@ -34,20 +62,40 @@ namespace DiGi.Communication.WebAPI.Classes
         [JsonPropertyName("displayReference")]
         public string? DisplayReference { get; }
 
+        /// <summary> Gets the electrical properties of the scattering object that was hit, or null if it carries none. </summary>
+        [JsonPropertyName("electricalProperties")]
+        public ElectricalPropertiesResult? ElectricalProperties { get; }
+
+        /// <summary> Gets the grazing angle [rad] relative to the surface tangent plane, or null if it could not be derived. </summary>
+        [JsonPropertyName("grazingAngle")]
+        public double? GrazingAngle { get; }
+
+        /// <summary> Gets the location of the hit point in world coordinates, or null if the hit carries none. </summary>
+        [JsonPropertyName("location")]
+        public Point3DResult? Location { get; }
+
+        /// <summary> Gets the unit surface normal vector at the hit point, or null if it could not be derived. </summary>
+        [JsonPropertyName("normal")]
+        public Vector3DResult? Normal { get; }
+
         /// <summary> Gets the reference of the scattering object that was hit. </summary>
         [JsonPropertyName("reference")]
         public string? Reference { get; }
 
-        /// <summary> Gets the X component of the hit direction. </summary>
-        [JsonPropertyName("x")]
-        public double X { get; }
+        /// <summary> Gets the reflection angle [rad] relative to the surface normal, or null if it could not be derived. </summary>
+        [JsonPropertyName("reflectionAngle")]
+        public double? ReflectionAngle { get; }
 
-        /// <summary> Gets the Y component of the hit direction. </summary>
-        [JsonPropertyName("y")]
-        public double Y { get; }
+        /// <summary> Gets the material relative permittivity at the operating frequency, or null if it could not be derived. </summary>
+        [JsonPropertyName("relativePermittivity")]
+        public double? RelativePermittivity { get; }
 
-        /// <summary> Gets the Z component of the hit direction. </summary>
-        [JsonPropertyName("z")]
-        public double Z { get; }
+        /// <summary> Gets the unit direction vector from the hit point towards the receiver, or null if it could not be derived. </summary>
+        [JsonPropertyName("vectorReceiver")]
+        public Vector3DResult? VectorReceiver { get; }
+
+        /// <summary> Gets the unit direction vector from the transmitter towards the hit point, or null if it could not be derived. </summary>
+        [JsonPropertyName("vectorTransmitter")]
+        public Vector3DResult? VectorTransmitter { get; }
     }
 }

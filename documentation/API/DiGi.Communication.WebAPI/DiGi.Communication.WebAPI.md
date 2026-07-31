@@ -212,27 +212,6 @@ The angular bins\. This value can be null\.
 [System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[RangeResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.RangeResult 'DiGi\.Communication\.WebAPI\.Classes\.RangeResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')  
 The [RangeResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.RangeResult 'DiGi\.Communication\.WebAPI\.Classes\.RangeResult') instances holding the bounds of the bins\. The list is empty rather than null when there is nothing to convert\.
 
-<a name='DiGi.Communication.WebAPI.Create.ScatteringHitResult(thisDiGi.Communication.Interfaces.IScatteringHit)'></a>
-
-## Create\.ScatteringHitResult\(this IScatteringHit\) Method
-
-Creates a [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') for the propagation calculation result from the specified [DiGi\.Communication\.Interfaces\.IScatteringHit](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.interfaces.iscatteringhit 'DiGi\.Communication\.Interfaces\.IScatteringHit')\.
-
-```csharp
-public static DiGi.Communication.WebAPI.Classes.ScatteringHitResult? ScatteringHitResult(this DiGi.Communication.Interfaces.IScatteringHit? scatteringHit);
-```
-#### Parameters
-
-<a name='DiGi.Communication.WebAPI.Create.ScatteringHitResult(thisDiGi.Communication.Interfaces.IScatteringHit).scatteringHit'></a>
-
-`scatteringHit` [DiGi\.Communication\.Interfaces\.IScatteringHit](https://learn.microsoft.com/en-us/dotnet/api/digi.communication.interfaces.iscatteringhit 'DiGi\.Communication\.Interfaces\.IScatteringHit')
-
-The scattering hit\. This value can be null\.
-
-#### Returns
-[ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult')  
-A [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') holding the hit direction and the reference of the scattering object that was hit, or null if the scattering hit is null or carries no direction\.
-
 <a name='DiGi.Communication.WebAPI.Create.ScatteringHitResult(thisDiGi.Communication.Interfaces.IScatteringHit,string)'></a>
 
 ## Create\.ScatteringHitResult\(this IScatteringHit, string\) Method
@@ -260,7 +239,7 @@ The display form of the reference of the scattering object that was hit\. This v
 
 #### Returns
 [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult')  
-A [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') holding the hit direction and the reference of the scattering object that was hit, or null if the scattering hit is null or carries no direction\.
+A [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') describing the hit, or null if the scattering hit is null\.
 
 <a name='DiGi.Communication.WebAPI.Create.Vector3DResult(thisDiGi.Geometry.Spatial.Classes.Vector3D)'></a>
 
