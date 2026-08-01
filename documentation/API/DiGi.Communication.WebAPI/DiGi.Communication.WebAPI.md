@@ -14,6 +14,27 @@ public static class Create
 Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object 'System\.Object') → Create
 ### Methods
 
+<a name='DiGi.Communication.WebAPI.Create.ComplexResult(thisSystem.Nullable_System.Numerics.Complex_)'></a>
+
+## Create\.ComplexResult\(this Nullable\<Complex\>\) Method
+
+Creates a [ComplexResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ComplexResult 'DiGi\.Communication\.WebAPI\.Classes\.ComplexResult') for the propagation calculation result from the specified [System\.Numerics\.Complex](https://learn.microsoft.com/en-us/dotnet/api/system.numerics.complex 'System\.Numerics\.Complex')\.
+
+```csharp
+public static DiGi.Communication.WebAPI.Classes.ComplexResult? ComplexResult(this System.Nullable<System.Numerics.Complex> complex);
+```
+#### Parameters
+
+<a name='DiGi.Communication.WebAPI.Create.ComplexResult(thisSystem.Nullable_System.Numerics.Complex_).complex'></a>
+
+`complex` [System\.Nullable&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')[System\.Numerics\.Complex](https://learn.microsoft.com/en-us/dotnet/api/system.numerics.complex 'System\.Numerics\.Complex')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')
+
+The complex number\. This value can be null\.
+
+#### Returns
+[ComplexResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ComplexResult 'DiGi\.Communication\.WebAPI\.Classes\.ComplexResult')  
+A [ComplexResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ComplexResult 'DiGi\.Communication\.WebAPI\.Classes\.ComplexResult') holding the components of the complex number, or null if the complex number is null or does not carry finite components\.
+
 <a name='DiGi.Communication.WebAPI.Create.ElectricalPropertiesResult(thisDiGi.Communication.Classes.ElectricalProperties)'></a>
 
 ## Create\.ElectricalPropertiesResult\(this ElectricalProperties\) Method

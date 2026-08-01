@@ -168,7 +168,7 @@ namespace DiGi.Communication.WebAPI
                         // emitted: the two range lists are filtered independently, so their cross
                         // product is overwhelmingly empty.
                         // The hits of a bin travel flat, which is the whole of the two step
-                        // drill-down: the matrix cell counts them and opens them.
+                        // drill-down: the matrix cell summarises them and opens them.
                         if (angularPowerDistribution.GetAzimuthRanges(true) is IReadOnlyList<Range<double>> azimuthRanges && azimuthRanges.Count != 0
                             && angularPowerDistribution.GetElevationRanges(true) is IReadOnlyList<Range<double>> elevationRanges && elevationRanges.Count != 0)
                         {
@@ -182,7 +182,7 @@ namespace DiGi.Communication.WebAPI
 
                                     // The hits of the bin, which is both the emptiness test for the
                                     // empty majority of the cross product and the only hit source:
-                                    // the count of this collection is what the matrix cell renders.
+                                    // this collection is what the matrix cell summarises.
                                     if (angularPowerDistribution.GetScatteringHits(azimuth, elevation) is not IReadOnlyList<IScatteringHit> scatteringHits || scatteringHits.Count == 0)
                                     {
                                         continue;

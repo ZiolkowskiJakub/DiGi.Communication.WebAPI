@@ -6,7 +6,7 @@ namespace DiGi.Communication.WebAPI.Classes
     /// Represents a single scattering hit of the propagation calculation result.
     /// <para>Everything a hit describes is read off the hit itself: it carries its own location, its own electrical properties and the derived material and geometry values, so a consuming application needs no lookup to render a row.</para>
     /// <para>The angles are sent in radians like every other angle of this payload, and the consuming application converts them for display. A value that could not be derived (missing electrical properties, missing antenna location) is sent as null rather than as NaN: NaN is not valid JSON and the serializer rejects it.</para>
-    /// <para><see cref="VerticalPolarizationReflection"/> is the one value that travels as a string rather than as a number: it is a complex number, which has no numeric JSON form, so it is rendered by <see cref="DiGi.Core.Convert.ToSystem_String(System.Numerics.Complex, double, double)"/>, the canonical rendering of a complex number in this project.</para>
+    /// <para>The reflection coefficient for vertical polarization is a complex number, which has no numeric JSON form, so it travels twice: <see cref="VerticalPolarizationReflection"/> is the display form rendered by <see cref="DiGi.Core.Convert.ToSystem_String(System.Numerics.Complex, double, double)"/>, the canonical rendering of a complex number in this project, and <see cref="VerticalPolarizationReflectionValue"/> is the same value as its two components. The display form saves every consuming application from reimplementing that rendering; the components are there because a rendered string cannot be aggregated, and the hits of an azimuth and elevation bin are averaged by the consuming application (the bins the payload describes are finer than the ones it displays, so the aggregation cannot be done here).</para>
     /// <para><see cref="VectorReceiver"/>, <see cref="VectorTransmitter"/> and <see cref="Normal"/> are unit vectors, unlike the angular power distribution vectors of <see cref="VectorGroupResult"/>, whose length carries the power.</para>
     /// </summary>
     public class ScatteringHitResult
@@ -26,6 +26,7 @@ namespace DiGi.Communication.WebAPI.Classes
         /// <param name="vectorTransmitter">The unit direction vector from the transmitter towards the hit point.</param>
         /// <param name="normal">The unit surface normal vector at the hit point.</param>
         /// <param name="verticalPolarizationReflection">The complex reflection coefficient for vertical polarization, already rendered as a string.</param>
+        /// <param name="verticalPolarizationReflectionValue">The complex reflection coefficient for vertical polarization as its two components.</param>
         public ScatteringHitResult(
             Point3DResult? location,
             string? reference,
@@ -38,7 +39,8 @@ namespace DiGi.Communication.WebAPI.Classes
             Vector3DResult? vectorReceiver,
             Vector3DResult? vectorTransmitter,
             Vector3DResult? normal,
-            string? verticalPolarizationReflection)
+            string? verticalPolarizationReflection,
+            ComplexResult? verticalPolarizationReflectionValue)
         {
             Location = location;
             Reference = reference;
@@ -52,6 +54,7 @@ namespace DiGi.Communication.WebAPI.Classes
             VectorTransmitter = vectorTransmitter;
             Normal = normal;
             VerticalPolarizationReflection = verticalPolarizationReflection;
+            VerticalPolarizationReflectionValue = verticalPolarizationReflectionValue;
         }
 
         /// <summary> Gets the material conductivity [S/m] at the operating frequency, or null if it could not be derived. </summary>
@@ -105,5 +108,9 @@ namespace DiGi.Communication.WebAPI.Classes
         /// <summary> Gets the complex reflection coefficient for vertical polarization, rendered as "{real}{+|-}j{imaginary}", or null if it could not be derived. </summary>
         [JsonPropertyName("verticalPolarizationReflection")]
         public string? VerticalPolarizationReflection { get; }
+
+        /// <summary> Gets the complex reflection coefficient for vertical polarization as its two components, or null if it could not be derived. This is the form to aggregate; <see cref="VerticalPolarizationReflection"/> is the form to display. </summary>
+        [JsonPropertyName("verticalPolarizationReflectionValue")]
+        public ComplexResult? VerticalPolarizationReflectionValue { get; }
     }
 }
