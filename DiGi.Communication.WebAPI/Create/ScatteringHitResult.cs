@@ -1,6 +1,7 @@
 using DiGi.Communication.Classes;
 using DiGi.Communication.Enums;
 using DiGi.Communication.Interfaces;
+using System.Numerics;
 
 namespace DiGi.Communication.WebAPI
 {
@@ -30,6 +31,16 @@ namespace DiGi.Communication.WebAPI
             // Read once: the property clones what it returns, so every access is another deep copy.
             ElectricalProperties? electricalProperties = scatteringHit.ElectricalProperties;
 
+            // The reflection coefficient is complex, so it has no numeric JSON form and travels already rendered.
+            // An underivable one is dropped to null like every other value above: rounding leaves NaN and infinity
+            // untouched, so rendering an invalid coefficient would send a string such as "NaN+jNaN". Called fully
+            // qualified because this assembly declares its own Query partial class, which shadows DiGi.Core.Query
+            // for unqualified use.
+            Complex complex = scatteringHit.GetVerticalPolarizationReflection();
+            string? verticalPolarizationReflection = DiGi.Core.Query.IsValid(complex)
+                ? DiGi.Core.Convert.ToSystem_String(complex, 0.0001, 0.0001)
+                : null;
+
             return new(
                 scatteringHit.Location.Point3DResult(),
                 scatteringHit.Reference,
@@ -41,7 +52,8 @@ namespace DiGi.Communication.WebAPI
                 Value(scatteringHit.GetGrazingAngle()),
                 scatteringHit.GetVector3D(Function.Receiver).Vector3DResult(),
                 scatteringHit.GetVector3D(Function.Transmitter).Vector3DResult(),
-                scatteringHit.GetNormal().Vector3DResult());
+                scatteringHit.GetNormal().Vector3DResult(),
+                verticalPolarizationReflection);
         }
     }
 }

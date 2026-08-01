@@ -910,6 +910,8 @@ Everything a hit describes is read off the hit itself: it carries its own locati
 
 The angles are sent in radians like every other angle of this payload, and the consuming application converts them for display. A value that could not be derived (missing electrical properties, missing antenna location) is sent as null rather than as NaN: NaN is not valid JSON and the serializer rejects it.
 
+[VerticalPolarizationReflection](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.VerticalPolarizationReflection 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.VerticalPolarizationReflection') is the one value that travels as a string rather than as a number: it is a complex number, which has no numeric JSON form, so it is rendered by [DiGi\.Core\.Convert\.ToSystem\_String\(System\.Numerics\.Complex,System\.Double,System\.Double\)](https://learn.microsoft.com/en-us/dotnet/api/digi.core.convert.tosystem_string#digi-core-convert-tosystem_string(system-numerics-complex-system-double-system-double) 'DiGi\.Core\.Convert\.ToSystem\_String\(System\.Numerics\.Complex,System\.Double,System\.Double\)'), the canonical rendering of a complex number in this project.
+
 [VectorReceiver](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.VectorReceiver 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.VectorReceiver'), [VectorTransmitter](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.VectorTransmitter 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.VectorTransmitter') and [Normal](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult.Normal 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult\.Normal') are unit vectors, unlike the angular power distribution vectors of [VectorGroupResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.VectorGroupResult 'DiGi\.Communication\.WebAPI\.Classes\.VectorGroupResult'), whose length carries the power.
 
 ```csharp
@@ -919,82 +921,88 @@ public class ScatteringHitResult
 Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object 'System\.Object') → ScatteringHitResult
 ### Constructors
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult)'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string)'></a>
 
-## ScatteringHitResult\(Point3DResult, string, string, ElectricalPropertiesResult, Nullable\<double\>, Nullable\<double\>, Nullable\<double\>, Nullable\<double\>, Vector3DResult, Vector3DResult, Vector3DResult\) Constructor
+## ScatteringHitResult\(Point3DResult, string, string, ElectricalPropertiesResult, Nullable\<double\>, Nullable\<double\>, Nullable\<double\>, Nullable\<double\>, Vector3DResult, Vector3DResult, Vector3DResult, string\) Constructor
 
 Initializes a new instance of the [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') class\.
 
 ```csharp
-public ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult? location, string? reference, string? displayReference, DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult? electricalProperties, System.Nullable<double> conductivity, System.Nullable<double> relativePermittivity, System.Nullable<double> reflectionAngle, System.Nullable<double> grazingAngle, DiGi.Communication.WebAPI.Classes.Vector3DResult? vectorReceiver, DiGi.Communication.WebAPI.Classes.Vector3DResult? vectorTransmitter, DiGi.Communication.WebAPI.Classes.Vector3DResult? normal);
+public ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult? location, string? reference, string? displayReference, DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult? electricalProperties, System.Nullable<double> conductivity, System.Nullable<double> relativePermittivity, System.Nullable<double> reflectionAngle, System.Nullable<double> grazingAngle, DiGi.Communication.WebAPI.Classes.Vector3DResult? vectorReceiver, DiGi.Communication.WebAPI.Classes.Vector3DResult? vectorTransmitter, DiGi.Communication.WebAPI.Classes.Vector3DResult? normal, string? verticalPolarizationReflection);
 ```
 #### Parameters
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).location'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).location'></a>
 
 `location` [Point3DResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.Point3DResult 'DiGi\.Communication\.WebAPI\.Classes\.Point3DResult')
 
 The location of the hit point in world coordinates\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).reference'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).reference'></a>
 
 `reference` [System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
 
 The reference of the scattering object that was hit\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).displayReference'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).displayReference'></a>
 
 `displayReference` [System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
 
 The display form of the reference of the scattering object that was hit\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).electricalProperties'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).electricalProperties'></a>
 
 `electricalProperties` [ElectricalPropertiesResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult 'DiGi\.Communication\.WebAPI\.Classes\.ElectricalPropertiesResult')
 
 The electrical properties of the scattering object that was hit\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).conductivity'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).conductivity'></a>
 
 `conductivity` [System\.Nullable&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')[System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')
 
 The material conductivity \[S/m\] at the operating frequency\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).relativePermittivity'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).relativePermittivity'></a>
 
 `relativePermittivity` [System\.Nullable&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')[System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')
 
 The material relative permittivity at the operating frequency\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).reflectionAngle'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).reflectionAngle'></a>
 
 `reflectionAngle` [System\.Nullable&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')[System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')
 
 The reflection angle \[rad\] relative to the surface normal\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).grazingAngle'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).grazingAngle'></a>
 
 `grazingAngle` [System\.Nullable&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')[System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1 'System\.Nullable\`1')
 
 The grazing angle \[rad\] relative to the surface tangent plane\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).vectorReceiver'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).vectorReceiver'></a>
 
 `vectorReceiver` [Vector3DResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.Vector3DResult 'DiGi\.Communication\.WebAPI\.Classes\.Vector3DResult')
 
 The unit direction vector from the hit point towards the receiver\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).vectorTransmitter'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).vectorTransmitter'></a>
 
 `vectorTransmitter` [Vector3DResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.Vector3DResult 'DiGi\.Communication\.WebAPI\.Classes\.Vector3DResult')
 
 The unit direction vector from the transmitter towards the hit point\.
 
-<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult).normal'></a>
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).normal'></a>
 
 `normal` [Vector3DResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.Vector3DResult 'DiGi\.Communication\.WebAPI\.Classes\.Vector3DResult')
 
 The unit surface normal vector at the hit point\.
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.ScatteringHitResult(DiGi.Communication.WebAPI.Classes.Point3DResult,string,string,DiGi.Communication.WebAPI.Classes.ElectricalPropertiesResult,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,System.Nullable_double_,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,DiGi.Communication.WebAPI.Classes.Vector3DResult,string).verticalPolarizationReflection'></a>
+
+`verticalPolarizationReflection` [System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
+
+The complex reflection coefficient for vertical polarization, already rendered as a string\.
 ### Properties
 
 <a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.Conductivity'></a>
@@ -1143,6 +1151,19 @@ public DiGi.Communication.WebAPI.Classes.Vector3DResult? VectorTransmitter { get
 
 #### Property Value
 [Vector3DResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.Vector3DResult 'DiGi\.Communication\.WebAPI\.Classes\.Vector3DResult')
+
+<a name='DiGi.Communication.WebAPI.Classes.ScatteringHitResult.VerticalPolarizationReflection'></a>
+
+## ScatteringHitResult\.VerticalPolarizationReflection Property
+
+Gets the complex reflection coefficient for vertical polarization, rendered as "\{real\}\{\+\|\-\}j\{imaginary\}", or null if it could not be derived\.
+
+```csharp
+public string? VerticalPolarizationReflection { get; }
+```
+
+#### Property Value
+[System\.String](https://learn.microsoft.com/en-us/dotnet/api/system.string 'System\.String')
 
 <a name='DiGi.Communication.WebAPI.Classes.ScatteringPolylineResult'></a>
 
