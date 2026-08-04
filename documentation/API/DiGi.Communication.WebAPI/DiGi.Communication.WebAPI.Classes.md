@@ -547,7 +547,7 @@ Everything is expressed in world coordinates: the propagation ellipsoids, the sc
 
 AI-NOTE (payload evolution): this is the V1 delay based payload, consumed by wwwroot/js/communication-tools.js in DiGi.GIS.WebAPI.UI (renderDelayResults, the Results and Details panels). The [Delays](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.Delays 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult\.Delays') array discriminates this V1 payload from the V2 one in that file. New fields are added as additional constructor parameters and properties on the type they belong to; the consumer tolerates unknown keys. Nulls are written rather than omitted, so a field that must stay invisible to older clients needs JsonIgnore with JsonIgnoreCondition.WhenWritingNull.
 
-AI-NOTE (scattering hit nesting): the Details drill-down of the consuming application is two steps deep and the payload mirrors it exactly. [Cells](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult.Cells 'DiGi\.Communication\.WebAPI\.Classes\.AngularPowerDistributionResult\.Cells') holds one [ScatteringHitCellResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitCellResult') per populated azimuth and elevation bin, and that cell holds the individual [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') instances flat. An earlier form nested a per electrical properties group between the two; it was removed once a hit began carrying its own electrical properties, and re-introducing it would break the cell count the matrix renders.
+AI-NOTE (scattering hit nesting): the Details drill-down of the consuming application is two steps deep and the payload mirrors it exactly. [Cells](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult.Cells 'DiGi\.Communication\.WebAPI\.Classes\.AngularPowerDistributionResult\.Cells') holds one [ScatteringHitCellResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitCellResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitCellResult') per populated azimuth and elevation bin, and that cell holds the individual [ScatteringHitResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.ScatteringHitResult 'DiGi\.Communication\.WebAPI\.Classes\.ScatteringHitResult') instances flat. An earlier form nested a per electrical properties group between the two; it was removed once a hit began carrying its own electrical properties, and re-introducing it would break the cell count the matrix renders. [Combined](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.Combined 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult\.Combined') is the same nesting with no delay key: one entry per angular power distribution profile holding the hits of all its delays at once, which the Details form offers as the Combined entry of its delay selector. Its hits are therefore the hits of [Results](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.Results 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult\.Results') a second time, binned by the hit geometry rather than grouped by delay.
 
 AI-NOTE (serialization contract): these result types are deliberately NOT SerializableObject instances. A SerializableObject serializes as PascalCase property names plus a _type discriminator, whereas the 3D view reads the camelCase keys literally. The keys are therefore pinned by JsonPropertyName on every property, which makes them independent of the hosting application naming policy: the same instance serializes identically from this Web API and from the consuming application. Renaming a property is safe; changing an attribute value silently breaks the 3D view.
 
@@ -560,47 +560,66 @@ public class GeometricalPropagationResult
 Inheritance [System\.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object 'System\.Object') → GeometricalPropagationResult
 ### Constructors
 
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_)'></a>
+<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult_)'></a>
 
-## GeometricalPropagationResult\(double, Point3DResult, Point3DResult, List\<double\>, List\<DelayResult\>\) Constructor
+## GeometricalPropagationResult\(double, Point3DResult, Point3DResult, List\<double\>, List\<DelayResult\>, List\<AngularPowerDistributionResult\>\) Constructor
 
 Initializes a new instance of the [GeometricalPropagationResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult') class\.
 
 ```csharp
-public GeometricalPropagationResult(double distance, DiGi.Communication.WebAPI.Classes.Point3DResult? transmitter, DiGi.Communication.WebAPI.Classes.Point3DResult? receiver, System.Collections.Generic.List<double>? delays, System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.DelayResult>? results);
+public GeometricalPropagationResult(double distance, DiGi.Communication.WebAPI.Classes.Point3DResult? transmitter, DiGi.Communication.WebAPI.Classes.Point3DResult? receiver, System.Collections.Generic.List<double>? delays, System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.DelayResult>? results, System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult>? combined);
 ```
 #### Parameters
 
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_).distance'></a>
+<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult_).distance'></a>
 
 `distance` [System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')
 
 The distance between the transmitter and the receiver antenna\.
 
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_).transmitter'></a>
+<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult_).transmitter'></a>
 
 `transmitter` [Point3DResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.Point3DResult 'DiGi\.Communication\.WebAPI\.Classes\.Point3DResult')
 
 The location of the transmitter antenna\.
 
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_).receiver'></a>
+<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult_).receiver'></a>
 
 `receiver` [Point3DResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.Point3DResult 'DiGi\.Communication\.WebAPI\.Classes\.Point3DResult')
 
 The location of the receiver antenna\.
 
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_).delays'></a>
+<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult_).delays'></a>
 
 `delays` [System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[System\.Double](https://learn.microsoft.com/en-us/dotnet/api/system.double 'System\.Double')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
 
-All available delays, ascending, one per entry of [results](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_).results 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult\.GeometricalPropagationResult\(double, DiGi\.Communication\.WebAPI\.Classes\.Point3DResult, DiGi\.Communication\.WebAPI\.Classes\.Point3DResult, System\.Collections\.Generic\.List\<double\>, System\.Collections\.Generic\.List\<DiGi\.Communication\.WebAPI\.Classes\.DelayResult\>\)\.results')\.
+All available delays, ascending, one per entry of [results](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult_).results 'DiGi\.Communication\.WebAPI\.Classes\.GeometricalPropagationResult\.GeometricalPropagationResult\(double, DiGi\.Communication\.WebAPI\.Classes\.Point3DResult, DiGi\.Communication\.WebAPI\.Classes\.Point3DResult, System\.Collections\.Generic\.List\<double\>, System\.Collections\.Generic\.List\<DiGi\.Communication\.WebAPI\.Classes\.DelayResult\>, System\.Collections\.Generic\.List\<DiGi\.Communication\.WebAPI\.Classes\.AngularPowerDistributionResult\>\)\.results')\.
 
-<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_).results'></a>
+<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult_).results'></a>
 
 `results` [System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[DelayResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.DelayResult 'DiGi\.Communication\.WebAPI\.Classes\.DelayResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
 
 The calculation result grouped by delay, ascending\.
+
+<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.GeometricalPropagationResult(double,DiGi.Communication.WebAPI.Classes.Point3DResult,DiGi.Communication.WebAPI.Classes.Point3DResult,System.Collections.Generic.List_double_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.DelayResult_,System.Collections.Generic.List_DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult_).combined'></a>
+
+`combined` [System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[AngularPowerDistributionResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult 'DiGi\.Communication\.WebAPI\.Classes\.AngularPowerDistributionResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
+
+The angular power distributions holding the scattering hits of all delays at once, one per angular power distribution profile\.
 ### Properties
+
+<a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.Combined'></a>
+
+## GeometricalPropagationResult\.Combined Property
+
+Gets the angular power distributions holding the scattering hits of all delays at once, one per angular power distribution profile\.
+
+```csharp
+public System.Collections.Generic.List<DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult> Combined { get; }
+```
+
+#### Property Value
+[System\.Collections\.Generic\.List&lt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')[AngularPowerDistributionResult](DiGi.Communication.WebAPI.Classes.md#DiGi.Communication.WebAPI.Classes.AngularPowerDistributionResult 'DiGi\.Communication\.WebAPI\.Classes\.AngularPowerDistributionResult')[&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1 'System\.Collections\.Generic\.List\`1')
 
 <a name='DiGi.Communication.WebAPI.Classes.GeometricalPropagationResult.Delays'></a>
 

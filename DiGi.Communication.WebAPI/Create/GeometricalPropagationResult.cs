@@ -1,4 +1,5 @@
 using DiGi.Communication.Classes;
+using DiGi.Communication.Enums;
 using DiGi.Communication.Interfaces;
 using DiGi.Core.Classes;
 using DiGi.Geometry.Spatial.Classes;
@@ -71,6 +72,63 @@ namespace DiGi.Communication.WebAPI
                 return result;
             }
 
+            // The scattering hits of one binned collection, kept in their azimuth/elevation bins so
+            // the Details form of the Results panel can render them as a matrix and drill down into a
+            // single bin. Only populated bins are described, and only non-empty intersections are
+            // emitted: the two range lists are filtered independently, so their cross product is
+            // overwhelmingly empty. The hits of a bin travel flat, which is the whole of the two step
+            // drill-down: the matrix cell summarises them and opens them.
+            // Written against a hit accessor rather than against a collection type, so the per-delay
+            // distributions and the combined collection of a whole profile project identically.
+            static Classes.AngularPowerDistributionResult? AngularPowerDistributionResult(Classes.Point3DResult? location, IReadOnlyList<Range<double>>? azimuthRanges, IReadOnlyList<Range<double>>? elevationRanges, Func<double, double, IReadOnlyList<IScatteringHit>?> scatteringHits, Func<string?, string?> displayReference)
+            {
+                if (azimuthRanges is null || azimuthRanges.Count == 0 || elevationRanges is null || elevationRanges.Count == 0)
+                {
+                    return null;
+                }
+
+                List<Classes.ScatteringHitCellResult> scatteringHitCellResults = [];
+                for (int i = 0; i < azimuthRanges.Count; i++)
+                {
+                    double azimuth = RangeMid(azimuthRanges[i]);
+                    for (int j = 0; j < elevationRanges.Count; j++)
+                    {
+                        double elevation = RangeMid(elevationRanges[j]);
+
+                        // The hits of the bin, which is both the emptiness test for the empty
+                        // majority of the cross product and the only hit source: this collection is
+                        // what the matrix cell summarises.
+                        if (scatteringHits(azimuth, elevation) is not IReadOnlyList<IScatteringHit> scatteringHits_Bin || scatteringHits_Bin.Count == 0)
+                        {
+                            continue;
+                        }
+
+                        List<Classes.ScatteringHitResult> scatteringHitResults = [];
+                        foreach (IScatteringHit scatteringHit in scatteringHits_Bin)
+                        {
+                            if (scatteringHit.ScatteringHitResult(displayReference(scatteringHit.Reference)) is Classes.ScatteringHitResult scatteringHitResult)
+                            {
+                                scatteringHitResults.Add(scatteringHitResult);
+                            }
+                        }
+
+                        if (scatteringHitResults.Count == 0)
+                        {
+                            continue;
+                        }
+
+                        scatteringHitCellResults.Add(new(i, j, scatteringHitResults));
+                    }
+                }
+
+                if (scatteringHitCellResults.Count == 0)
+                {
+                    return null;
+                }
+
+                return new(location, azimuthRanges.RangeResults(), elevationRanges.RangeResults(), scatteringHitCellResults);
+            }
+
             // All available delays, ascending (the delay slider order in the General panel).
             SortedSet<double> delays = [];
 
@@ -79,6 +137,10 @@ namespace DiGi.Communication.WebAPI
             Dictionary<double, List<Classes.ScatteringPolylineResult>> scatteringPolylineResults = [];
             Dictionary<double, List<Classes.VectorGroupResult>> vectorGroupResults = [];
             Dictionary<double, List<Classes.AngularPowerDistributionResult>> angularPowerDistributionResults = [];
+
+            // The same hits once more, per profile rather than per delay: the Combined entry of the
+            // delay selector of the Details form. Not keyed by delay, which is the whole point of it.
+            List<Classes.AngularPowerDistributionResult> combined = [];
 
             IEnumerable<ScatteringProfile>? scatteringProfiles = geometricalPropagationModel.GetScatteringProfiles<ScatteringProfile>();
             if (scatteringProfiles is not null)
@@ -160,56 +222,12 @@ namespace DiGi.Communication.WebAPI
 
                         delays.Add(delay);
 
-                        // The scattering hits behind the vectors, kept in their azimuth/elevation
-                        // bins so the Details form of the Results panel can render them as a matrix
-                        // and drill down into a single bin. Built before the Vectors guard below so
-                        // a distribution without renderable vectors still contributes its matrix.
-                        // Only populated bins are described, and only non-empty intersections are
-                        // emitted: the two range lists are filtered independently, so their cross
-                        // product is overwhelmingly empty.
-                        // The hits of a bin travel flat, which is the whole of the two step
-                        // drill-down: the matrix cell summarises them and opens them.
-                        if (angularPowerDistribution.GetAzimuthRanges(true) is IReadOnlyList<Range<double>> azimuthRanges && azimuthRanges.Count != 0
-                            && angularPowerDistribution.GetElevationRanges(true) is IReadOnlyList<Range<double>> elevationRanges && elevationRanges.Count != 0)
+                        // The scattering hits behind the vectors. Built before the Vectors guard
+                        // below so a distribution without renderable vectors still contributes its
+                        // matrix.
+                        if (AngularPowerDistributionResult(point3DResult_Location, angularPowerDistribution.GetAzimuthRanges(true), angularPowerDistribution.GetElevationRanges(true), angularPowerDistribution.GetScatteringHits, DisplayReference) is Classes.AngularPowerDistributionResult angularPowerDistributionResult)
                         {
-                            List<Classes.ScatteringHitCellResult> scatteringHitCellResults = [];
-                            for (int i = 0; i < azimuthRanges.Count; i++)
-                            {
-                                double azimuth = RangeMid(azimuthRanges[i]);
-                                for (int j = 0; j < elevationRanges.Count; j++)
-                                {
-                                    double elevation = RangeMid(elevationRanges[j]);
-
-                                    // The hits of the bin, which is both the emptiness test for the
-                                    // empty majority of the cross product and the only hit source:
-                                    // this collection is what the matrix cell summarises.
-                                    if (angularPowerDistribution.GetScatteringHits(azimuth, elevation) is not IReadOnlyList<IScatteringHit> scatteringHits || scatteringHits.Count == 0)
-                                    {
-                                        continue;
-                                    }
-
-                                    List<Classes.ScatteringHitResult> scatteringHitResults = [];
-                                    foreach (IScatteringHit scatteringHit in scatteringHits)
-                                    {
-                                        if (scatteringHit.ScatteringHitResult(DisplayReference(scatteringHit.Reference)) is Classes.ScatteringHitResult scatteringHitResult)
-                                        {
-                                            scatteringHitResults.Add(scatteringHitResult);
-                                        }
-                                    }
-
-                                    if (scatteringHitResults.Count == 0)
-                                    {
-                                        continue;
-                                    }
-
-                                    scatteringHitCellResults.Add(new(i, j, scatteringHitResults));
-                                }
-                            }
-
-                            if (scatteringHitCellResults.Count != 0)
-                            {
-                                Add(angularPowerDistributionResults, delay, new Classes.AngularPowerDistributionResult(point3DResult_Location, azimuthRanges.RangeResults(), elevationRanges.RangeResults(), scatteringHitCellResults));
-                            }
+                            Add(angularPowerDistributionResults, delay, angularPowerDistributionResult);
                         }
 
                         // The vectors visualized at the location; their length carries the power,
@@ -220,6 +238,21 @@ namespace DiGi.Communication.WebAPI
                         }
 
                         Add(vectorGroupResults, delay, new Classes.VectorGroupResult(point3DResult_Location, vector3Ds.Vector3DResults()));
+                    }
+
+                    // The hits of every delay of this profile in one grid, which the Details form
+                    // offers as the Combined entry of its delay selector. Read once per profile
+                    // rather than once per delay: the query walks the distributions of the profile
+                    // and both the distribution list and the hit grid of a distribution clone on
+                    // every access.
+                    // Function.Receiver is what AngularPowerDistributionSolver bins the per-delay
+                    // grids with, so the combined bins line up with the per-delay ones;
+                    // Function.Transmitter would bin by the transmitter -> hit vector instead and
+                    // produce a different grid.
+                    if (angularPowerDistributionProfile.SphericalDistributionScatteringHitCollection(Function.Receiver) is SphericalDistributionScatteringHitCollection sphericalDistributionScatteringHitCollection
+                        && AngularPowerDistributionResult(point3DResult_Location, sphericalDistributionScatteringHitCollection.GetAzimuthRanges(true), sphericalDistributionScatteringHitCollection.GetElevationRanges(true), sphericalDistributionScatteringHitCollection.GetValues, DisplayReference) is Classes.AngularPowerDistributionResult angularPowerDistributionResult_Combined)
+                    {
+                        combined.Add(angularPowerDistributionResult_Combined);
                     }
                 }
             }
@@ -237,7 +270,7 @@ namespace DiGi.Communication.WebAPI
 
             // The delays list (ascending, one entry per delayResults entry) discriminates this V1
             // payload from the V2 one in communication-tools.js and feeds the delay slider.
-            return new(transmitter.Distance(receiver), transmitter.Point3DResult(), receiver.Point3DResult(), [.. delays], delayResults);
+            return new(transmitter.Distance(receiver), transmitter.Point3DResult(), receiver.Point3DResult(), [.. delays], delayResults, combined);
         }
     }
 }
