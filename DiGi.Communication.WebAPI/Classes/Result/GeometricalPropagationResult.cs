@@ -21,13 +21,7 @@ namespace DiGi.Communication.WebAPI.Classes
         /// <param name="delays">All available delays, ascending, one per entry of <paramref name="results"/>.</param>
         /// <param name="results">The calculation result grouped by delay, ascending.</param>
         /// <param name="combined">The angular power distributions holding the scattering hits of all delays at once, one per angular power distribution profile.</param>
-        public GeometricalPropagationResult(
-            double distance,
-            Point3DResult? transmitter,
-            Point3DResult? receiver,
-            List<double>? delays,
-            List<DelayResult>? results,
-            List<AngularPowerDistributionResult>? combined)
+        public GeometricalPropagationResult(double distance, Point3DResult? transmitter, Point3DResult? receiver, List<double>? delays, List<DelayResult>? results, List<AngularPowerDistributionResult>? combined)
         {
             Distance = distance;
             Transmitter = transmitter;
